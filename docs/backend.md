@@ -11,7 +11,7 @@ for projects and todos.
 The API is used by:
 
 - the frontend application
-- automated UI and API tests
+- automated UI, API and unit tests
 
 ---
 
@@ -50,7 +50,7 @@ npm install
 
 ## Environment variables
 
-Create a `.env` file in `apps/api` directory.
+Create a `.env` file in `apps/api` directory (can be creted from `.env.example`).
 
 Example:
 

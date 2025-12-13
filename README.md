@@ -13,8 +13,10 @@ Stack:
 
 Clone repository:
 
+```bash
 git clone https://github.com/oromis1508/qa-playwright-projects.git
 cd qa-playwright-projects
+```
 
 Backend setup:
 
