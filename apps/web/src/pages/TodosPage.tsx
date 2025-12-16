@@ -7,6 +7,7 @@ import { TodosList } from "../components/todos/TodosList";
 import { TodoCreateForm } from "../components/todos/TodoCreateForm";
 
 import { useTodos } from "../features/todos/useTodos";
+import { TodosFilter } from "../components/todos/TodosFilter";
 
 export default function TodosPage() {
   const { projectId } = useParams();
@@ -16,6 +17,9 @@ export default function TodosPage() {
     todos,
     loading,
     error,
+
+    filter,
+    setFilter,
 
     newTodo,
     setNewTodo,
@@ -76,7 +80,11 @@ export default function TodosPage() {
 
         {/* list */}
         <Card>
-          <div className="text-lg font-semibold">Todos</div>
+          <div className="flex items-center justify-between">
+            <div className="text-lg font-semibold">Todos</div>
+
+            <TodosFilter value={filter} onChange={setFilter} />
+          </div>
 
           <div className="mt-4">
             <TodosList

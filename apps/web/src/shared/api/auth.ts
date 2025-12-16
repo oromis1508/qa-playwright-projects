@@ -1,9 +1,6 @@
 import { api } from "./client";
 
-// Тип ответа register: у тебя backend возвращает { id, email }
 export type RegisterResponse = { id: number; email: string };
-
-// Тип ответа login: { token }
 export type LoginResponse = { token: string };
 
 export async function register(email: string, password: string) {

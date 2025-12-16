@@ -1,8 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
 
-import { getApiErrorMessage } from "../../shared/api/error";
+import {
+  redirectIfProjectMissing,
+  getApiErrorMessage,
+} from "../../shared/api/error";
 import { getProject } from "../../shared/api/projects";
 import {
   createTodo,
@@ -12,6 +14,7 @@ import {
   updateTodo,
   type Todo,
 } from "../../shared/api/todos";
+import type { TodoFilter } from "../../components/todos/TodosFilter";
 
 export function useTodos(projectIdParam: string | undefined) {
   const navigate = useNavigate();
@@ -19,6 +22,17 @@ export function useTodos(projectIdParam: string | undefined) {
 
   const [projectName, setProjectName] = useState("");
   const [todos, setTodos] = useState<Todo[]>([]);
+  const [filter, setFilter] = useState<TodoFilter>("all");
+  const filteredTodos = useMemo(() => {
+    switch (filter) {
+      case "active":
+        return todos.filter((t) => !t.completed);
+      case "completed":
+        return todos.filter((t) => t.completed);
+      default:
+        return todos;
+    }
+  }, [todos, filter]);
 
   // create
   const [newTodo, setNewTodo] = useState("");
@@ -59,14 +73,7 @@ export function useTodos(projectIdParam: string | undefined) {
         setProjectName(project.name);
         setTodos(list);
       } catch (e: unknown) {
-        // проект удалён или не твой -> уводим на ProjectsPage
-        if (axios.isAxiosError(e)) {
-          const status = e.response?.status;
-          if (status === 403 || status === 404) {
-            navigate("/", { replace: true });
-            return;
-          }
-        }
+        if (redirectIfProjectMissing(e, navigate)) return;
         if (!cancelled) setError(getApiErrorMessage(e, "Failed to load todos"));
       } finally {
         if (!cancelled) setLoading(false);
@@ -173,9 +180,13 @@ export function useTodos(projectIdParam: string | undefined) {
     projectId,
     projectName,
 
-    todos,
+    todos: filteredTodos,
     loading,
     error,
+
+    // filter
+    filter,
+    setFilter,
 
     // create
     newTodo,

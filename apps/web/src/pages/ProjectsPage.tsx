@@ -1,124 +1,36 @@
-import { useEffect, useMemo, useState } from "react";
-
 import { Layout } from "../components/Layout";
 import { Card } from "../components/Card";
 import { Button } from "../components/Button";
 import { Input } from "../components/Input";
-
-import { getApiErrorMessage } from "../shared/api/error";
-import {
-  type Project,
-  getProjects,
-  createProject as apiCreateProject,
-  renameProject as apiRenameProject,
-  deleteProject as apiDeleteProject,
-} from "../shared/api/projects";
-
 import { ProjectsList } from "../components/projects/ProjectsList";
 
+import { useProjects } from "../features/projects/useProjects";
+
 export default function ProjectsPage() {
-  const [projects, setProjects] = useState<Project[]>([]);
+  const {
+    projects,
+    loading,
+    error,
 
-  const [name, setName] = useState("");
-  const canCreate = useMemo(() => name.trim().length > 0, [name]);
-  const [creating, setCreating] = useState(false);
+    name,
+    setName,
+    creating,
+    canCreate,
+    create,
 
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+    refresh,
 
-  const [editingId, setEditingId] = useState<number | null>(null);
-  const [editingName, setEditingName] = useState("");
-  const [savingEdit, setSavingEdit] = useState(false);
+    editingId,
+    editingName,
+    setEditingName,
+    savingEdit,
+    startEdit,
+    cancelEdit,
+    saveEdit,
 
-  const [deletingId, setDeletingId] = useState<number | null>(null);
-
-  async function load() {
-    setError(null);
-    setLoading(true);
-
-    try {
-      const data = await getProjects();
-      setProjects(data);
-    } catch (e: unknown) {
-      setError(getApiErrorMessage(e, "Failed to load projects"));
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  async function create() {
-    if (!canCreate) return;
-
-    setCreating(true);
-    setError(null);
-
-    try {
-      const created = await apiCreateProject(name.trim());
-      setProjects((prev) => [created, ...prev]);
-      setName("");
-    } catch (e: unknown) {
-      setError(getApiErrorMessage(e, "Failed to create project"));
-    } finally {
-      setCreating(false);
-    }
-  }
-
-  function startEdit(p: Project) {
-    setError(null);
-    setEditingId(p.id);
-    setEditingName(p.name);
-  }
-
-  function cancelEdit() {
-    setEditingId(null);
-    setEditingName("");
-  }
-
-  async function saveEdit() {
-    if (editingId === null) return;
-    const newName = editingName.trim();
-    if (!newName) return;
-
-    setSavingEdit(true);
-    setError(null);
-
-    try {
-      const updated = await apiRenameProject(editingId, newName);
-      setProjects((prev) =>
-        prev.map((p) => (p.id === editingId ? updated : p))
-      );
-      cancelEdit();
-    } catch (e: unknown) {
-      setError(getApiErrorMessage(e, "Failed to rename project"));
-    } finally {
-      setSavingEdit(false);
-    }
-  }
-
-  async function remove(p: Project) {
-    const ok = window.confirm(
-      `Delete project "${p.name}"? This can't be undone.`
-    );
-    if (!ok) return;
-
-    setDeletingId(p.id);
-    setError(null);
-
-    try {
-      await apiDeleteProject(p.id);
-      setProjects((prev) => prev.filter((x) => x.id !== p.id));
-
-      if (editingId === p.id) cancelEdit();
-    } catch (e: unknown) {
-      setError(getApiErrorMessage(e, "Failed to delete project"));
-    } finally {
-      setDeletingId(null);
-    }
-  }
-
-  useEffect(() => {
-    load();
-  }, []);
+    deletingId,
+    remove,
+  } = useProjects();
 
   return (
     <Layout title="Projects">
@@ -151,7 +63,7 @@ export default function ProjectsPage() {
         <Card>
           <div className="flex items-center justify-between">
             <div className="text-lg font-semibold">Your projects</div>
-            <Button onClick={load} disabled={loading}>
+            <Button onClick={refresh} disabled={loading}>
               Refresh
             </Button>
           </div>
