@@ -17,7 +17,7 @@ app.get("/health", (_req, res) => {
 app.use("/auth", authRoutes);
 app.use("/projects", projectsRoutes);
 
-if (process.env.NODE_ENV === "test") {
+if (process.env.NODE_ENV?.trim() === "test") {
   app.use("/__test__", testRoutes);
 }
 

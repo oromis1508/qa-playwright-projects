@@ -5,9 +5,10 @@
   "main": "index.js",
   "scripts": {
     "test": "playwright test",
-    "test:api": "playwright test src/api",
-    "test:ui": "playwright test src/ui",
-    "report": "playwright show-report"
+    "test:api": "npx playwright test --project=api",
+    "test:ui": "npx playwright test --project=ui",
+    "report": "playwright show-report",
+    "server": "cd ../apps/api && set NODE_ENV=test && npm run dev"
   },
   "keywords": [],
   "author": "",
@@ -15,6 +16,7 @@
   "type": "module",
   "devDependencies": {
     "@playwright/test": "^1.57.0",
+    "@types/node": "^25.0.2",
     "dotenv": "^17.2.3"
   }
 }
