@@ -7,9 +7,9 @@ function uniqueEmail(prefix = "user") {
 }
 
 test.describe("Auth API", () => {
-  const password = "password123";
-
   test.describe("register", () => {
+    const password = "password123";
+
     test("register -> 201, returns {id, email}", async ({ authApi }) => {
       const email = uniqueEmail("reg_ok");
       const res = await authApi.register(email, password);
@@ -63,17 +63,8 @@ test.describe("Auth API", () => {
   });
 
   test.describe("login", () => {
-    let email: string;
-
-    test.beforeEach(async ({ authApi }) => {
-      email = uniqueEmail("login_user");
-      const res = await authApi.register(email, password);
-
-      expect(res.status, res.error).toBe(201);
-    });
-
-    test("login -> 200, returns token", async ({ authApi }) => {
-      const res = await authApi.login(email, password);
+    test("login -> 200, returns token", async ({ authApi, user }) => {
+      const res = await authApi.login(user.email, user.password);
 
       expect(res.status, res.error).toBe(200);
       expect(res.token).toBeTruthy();
@@ -83,22 +74,22 @@ test.describe("Auth API", () => {
       expect(parts).toHaveLength(3);
     });
 
-    test("login wrong password -> 401", async ({ authApi }) => {
-      const res = await authApi.login(email, "wrong_pass");
+    test("login wrong password -> 401", async ({ authApi, user }) => {
+      const res = await authApi.login(user.email, "wrong_pass");
 
       expect(res.status, res.error).toBe(401);
       expect(res.error).toBeTruthy();
     });
 
-    test("login wrong email -> 401", async ({ authApi }) => {
-      const res = await authApi.login("a" + email, password);
+    test("login wrong email -> 401", async ({ authApi, user }) => {
+      const res = await authApi.login("a" + user.email, user.password);
 
       expect(res.status, res.error).toBe(401);
       expect(res.error).toBeTruthy();
     });
 
-    test("login invalid email format -> 400", async ({ authApi }) => {
-      const res = await authApi.login("not-an-email", password);
+    test("login invalid email format -> 400", async ({ authApi, user }) => {
+      const res = await authApi.login("not-an-email", user.password);
 
       expect(res.status, res.error).toBe(400);
       expect(res.error).toBeTruthy();
@@ -111,8 +102,8 @@ test.describe("Auth API", () => {
       expect(res.error).toBeTruthy();
     });
 
-    test("login empty password -> 400", async ({ authApi }) => {
-      const res = await authApi.login(email, "");
+    test("login empty password -> 400", async ({ authApi, user }) => {
+      const res = await authApi.login(user.email, "");
 
       expect(res.status, res.error).toBe(400);
       expect(res.error).toBeTruthy();
