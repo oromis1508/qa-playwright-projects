@@ -1,4 +1,3 @@
-// tests/api/specs/auth.spec.ts
 import { test, expect } from "../fixtures";
 
 function uniqueEmail(prefix = "user") {
@@ -15,8 +14,8 @@ test.describe("Auth API", () => {
       const res = await authApi.register(email, password);
 
       expect(res.status, res.error).toBe(201);
-      expect(res.email).toBe(email);
-      expect(typeof res.id).toBe("number");
+      expect(res.data?.email).toBe(email);
+      expect(typeof res.data?.id).toBe("number");
     });
 
     test("register same email twice -> 400", async ({ authApi }) => {
@@ -63,32 +62,41 @@ test.describe("Auth API", () => {
   });
 
   test.describe("login", () => {
-    test("login -> 200, returns token", async ({ authApi, user }) => {
+    test("login -> 200, returns token", async ({
+      authApi,
+      actorA: { user },
+    }) => {
       const res = await authApi.login(user.email, user.password);
 
       expect(res.status, res.error).toBe(200);
-      expect(res.token).toBeTruthy();
+      expect(res.data?.token).toBeTruthy();
 
-      const parts = res.token!.split(".");
+      const parts = res.data?.token?.split(".");
 
       expect(parts).toHaveLength(3);
     });
 
-    test("login wrong password -> 401", async ({ authApi, user }) => {
+    test("login wrong password -> 401", async ({
+      authApi,
+      actorA: { user },
+    }) => {
       const res = await authApi.login(user.email, "wrong_pass");
 
       expect(res.status, res.error).toBe(401);
       expect(res.error).toBeTruthy();
     });
 
-    test("login wrong email -> 401", async ({ authApi, user }) => {
+    test("login wrong email -> 401", async ({ authApi, actorA: { user } }) => {
       const res = await authApi.login("a" + user.email, user.password);
 
       expect(res.status, res.error).toBe(401);
       expect(res.error).toBeTruthy();
     });
 
-    test("login invalid email format -> 400", async ({ authApi, user }) => {
+    test("login invalid email format -> 400", async ({
+      authApi,
+      actorA: { user },
+    }) => {
       const res = await authApi.login("not-an-email", user.password);
 
       expect(res.status, res.error).toBe(400);
@@ -102,7 +110,10 @@ test.describe("Auth API", () => {
       expect(res.error).toBeTruthy();
     });
 
-    test("login empty password -> 400", async ({ authApi, user }) => {
+    test("login empty password -> 400", async ({
+      authApi,
+      actorA: { user },
+    }) => {
       const res = await authApi.login(user.email, "");
 
       expect(res.status, res.error).toBe(400);

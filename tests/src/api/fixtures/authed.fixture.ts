@@ -1,5 +1,5 @@
 import { request, type APIRequestContext } from "@playwright/test";
-import { AuthSession } from "./session.fixture";
+import { AuthSession } from "./types";
 
 export async function createAuthedApi(
   baseURL: string,

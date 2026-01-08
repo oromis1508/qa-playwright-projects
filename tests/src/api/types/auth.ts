@@ -1,15 +1,8 @@
-export interface LoginResponse {
+export type LoginData = {
   token?: string;
-}
-export interface LoginResult extends LoginResponse {
-  status: number;
-  error?: string;
-}
-export interface RegisterResponse {
+};
+
+export type RegisterData = {
   id?: number;
   email: string;
-}
-export interface RegisterResult extends RegisterResponse {
-  status: number;
-  error?: string;
-}
+};

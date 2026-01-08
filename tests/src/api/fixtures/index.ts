@@ -1,29 +1,31 @@
-import { test as base } from "@playwright/test";
+import { test as base, expect } from "@playwright/test";
 import type { APIRequestContext } from "@playwright/test";
 
 import { createApi } from "./api.fixture";
-import { createUser, type TestUser } from "./user.fixture";
-import { createAuthedApi } from "./authed.fixture";
-import { AuthApi } from "../clients/AuthApi";
-import { ProjectsApi } from "../clients/ProjectsApi";
-import { AuthSession, createSession } from "./session.fixture";
 import { createAuthApi } from "./auth.fixture";
-import { createProjectsApi } from "./projects.fixture";
+import { createProject, createProjectsApi } from "./projects.fixture";
+
+import type { AuthApi } from "../clients/AuthApi";
+import type { ProjectsApi } from "../clients/ProjectsApi";
+
+import { createActor, disposeActor } from "./actor.fixture";
+import { Actor } from "./types";
+import { Project } from "../types/project";
 
 type ApiFixtures = {
   api: APIRequestContext;
   authApi: AuthApi;
-  projectsApi: ProjectsApi;
+  projectsApi: ProjectsApi; // unauth
+  projectA: Project;
 
-  user: TestUser;
-  session: AuthSession;
-  authedApi: APIRequestContext;
-  projectsAuthedApi: ProjectsApi;
+  actorA: Actor;
+  actorB: Actor;
 };
 
 export const test = base.extend<ApiFixtures>({
   api: async ({ baseURL }, use) => {
     const api = await createApi(baseURL!);
+
     await use(api);
     await api.dispose();
   },
@@ -36,23 +38,25 @@ export const test = base.extend<ApiFixtures>({
     await use(createProjectsApi(api));
   },
 
-  user: async ({ authApi }, use) => {
-    await use(await createUser(authApi));
+  actorA: async ({ baseURL, authApi }, use) => {
+    const actor = await createActor(baseURL!, authApi);
+
+    await use(actor);
+    await disposeActor(actor);
   },
 
-  session: async ({ authApi, user }, use) => {
-    await use(await createSession(authApi, user));
+  actorB: async ({ baseURL, authApi }, use) => {
+    const actor = await createActor(baseURL!, authApi);
+
+    await use(actor);
+    await disposeActor(actor);
   },
 
-  authedApi: async ({ baseURL, session }, use) => {
-    const api = await createAuthedApi(baseURL!, session);
-    await use(api);
-    await api.dispose();
-  },
+  projectA: async ({ actorA }, use) => {
+    const project = await createProject(actorA, "projA");
 
-  projectsAuthedApi: async ({ authedApi }, use) => {
-    await use(new ProjectsApi(authedApi));
+    await use(project);
   },
 });
 
-export { expect } from "@playwright/test";
+export { expect };
